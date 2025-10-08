@@ -416,14 +416,6 @@ def get_activity_content(activity):
 
     return content, activity_type
 
-def escape_cdata_end(text):
-    """
-    Replace all occurrences of ']]>' with ']]]]><![CDATA[>' to safely embed in CDATA.
-    """
-    if text is None:
-        return text
-    return text.replace(']]>', ']]]]><![CDATA[>')
-
 
 def parse_and_save_activity(request,
                             user,
@@ -503,13 +495,11 @@ def parse_and_save_activity(request,
 
     if (activity_type == "quiz") or (activity_type == "feedback"):
         updated_json = parse_and_save_quiz(user, activity)
-        # Escape any CDATA end markers in the JSON (for rated feedback)
-        safe_json = escape_cdata_end(updated_json)
         # we need to update the JSON contents both in the XML and in the
         # activity data
         activity_node.find("content").text = \
-            "<![CDATA[ " + safe_json + "]]>"
-        activity.content = safe_json
+            "<![CDATA[ " + updated_json + "]]>"
+        activity.content = updated_json
 
     activity.save()
 
