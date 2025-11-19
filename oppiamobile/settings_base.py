@@ -74,6 +74,7 @@ INSTALLED_APPS = [
     'settings',
     'summary',
     'viz',
+    'training',
 
     'tastypie',
     'crispy_forms',

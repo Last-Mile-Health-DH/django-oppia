@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load display_functions %}
+
+{% block extra_head_title %}
+	{{ module_type.name }}
+{% endblock extra_head_title %}
+
+{% block header %}
+<div class="jumbotron mb-4">
+    <div class="row">
+			<div class="col-md-10">
+				<h3>
+					{% if request.user.is_staff %}
+						<a href="{% url 'training:module_type_list' %}">{% trans 'Module Types' %}</a>
+					{% else %}
+						<a href="{% url 'oppia:index' %}">{% trans 'Home' %}</a>
+					{% endif %}
+					<em class="material-icons md-18 ">arrow_forward_ios</em> {{ module_type.name }}</h3>
+			</div>
+			<div class="col-md-2 text-right">
+				<a href="{% url 'training:edit_module_type' module_type.id %}" class="btn btn-light mr-2">{% trans 'Edit' %}</a>
+			</div>
+	</div>
+
+</div>
+{% endblock header %}
+
+{% block content %}
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title">{% trans 'Description' %}</h5>
+            <p class="card-text">{{ module_type.description }}</p>
+            <h5 class="card-title">{% trans 'Code' %}</h5>
+            <p class="card-text">{{ module_type.code }}</p>
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">{% trans 'Trainings' %}</h5>
+            {% if trainings %}
+                <ul class="list-group">
+                    {% for training in trainings %}
+                        <li class="list-group-item">
+                            <a href="{% url 'training:training_detail' training.id %}">{{ training.name }}</a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>{% trans "No trainings available for this module type." %}</p>
+            {% endif %}
+        </div>
+    </div>
+{% endblock content %}

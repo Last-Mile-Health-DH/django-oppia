@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load display_functions %}
+
+{% block extra_head_title %}
+	{% trans 'Training' %}
+{% endblock extra_head_title %}
+
+{% block header %}
+<div class="jumbotron mb-3">
+	<div class="row">
+		<div class="col-sm-6">
+			<h3>{% trans 'Trainings' %}</h3>
+		</div>
+		<div class="col-sm-6 text-right">
+			<a href="{% url 'training:add_training' %}" class="btn btn-sm btn-secondary">
+				<span class="material-icons mr-2">add</span>
+				{% trans 'Add a Training' %}
+			</a>
+		</div>
+	</div>
+
+</div>
+{% endblock header %}
+
+{% block content %}
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th scope="col">{% trans 'Title' %}</th>
+                <th scope="col">{% trans 'Module Type' %}</th>
+                <th scope="col">{% trans 'Status' %}</th>
+                <th scope="col">{% trans 'Last Updated' %}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for training in trainings %}
+            <tr>
+                <td><a href="{% url 'training:training_detail' training.id %}">{{ training.name }}</a></td>
+                <td><a href="{% url 'training:module_type_detail' training.module_type.id %}">{{ training.module_type.name }}</a></td>
+                <td>{{ training.status }}</td>
+                <td>{{ training.updated_at|date:"SHORT_DATETIME_FORMAT" }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4">{% trans 'No trainings available.' %}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+{% endblock content %}

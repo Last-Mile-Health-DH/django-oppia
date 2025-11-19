@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load display_functions %}
+
+{% block extra_head_title %}
+	{% trans 'Module Type' %}
+{% endblock extra_head_title %}
+
+{% block header %}
+<div class="jumbotron mb-3">
+	<div class="row">
+		<div class="col-sm-6">
+			<h3>{% trans 'Module Types' %}</h3>
+		</div>
+		<div class="col-sm-6 text-right">
+			<a href="{% url 'training:add_module_type' %}" class="btn btn-sm btn-secondary">
+				<span class="material-icons mr-2">add</span>
+				{% trans 'Add a Module Type' %}
+			</a>
+		</div>
+	</div>
+
+</div>
+{% endblock header %}
+{% block content %}
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th scope="col">{% trans 'Name' %}</th>
+            <th scope="col">{% trans 'Description' %}</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for module_type in module_types %}
+        <tr>
+            <td><a href="{% url 'training:module_type_detail' module_type.id %}">{{ module_type.name }}</a></td>
+            <td>{{ module_type.description }}</td>
+            <td>{{ module_type.code }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="3">{% trans "No module types available." %}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock content %}

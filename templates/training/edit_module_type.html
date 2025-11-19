@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load display_functions %}
+{% load static %}
+
+{% block extra_head_title %}
+	{% trans 'Edit Module Type' %}
+{% endblock extra_head_title %}
+
+{% block header %}
+<div class="jumbotron mb-4">
+	<div class="row">
+		<div class="col-md-10">
+			<h3>
+				<a href="{% url 'training:module_type_list' %}">{% trans 'Module Types' %}</a>
+				<em class="material-icons md-18 ">arrow_forward_ios</em>
+				{% trans 'Edit Module Type' %}
+			</h3>
+		</div>
+	</div>
+</div>
+{% endblock header %}
+
+{% block content %}
+<form id="module-type-form" class="form-horizontal" method="post">
+	{% csrf_token %}
+	<div class="row">
+		<div class="col-md-6">
+			{% include 'common/form/input.html' with field=form.name %}
+			{% include 'common/form/input.html' with field=form.description %}
+			{% include 'common/form/input.html' with field=form.code %}
+		</div>
+	</div>
+	<div class="mt-2">
+		<button type="submit" class="btn btn-primary">{% trans 'Save Changes' %}</button>
+		<a href="{% url 'training:module_type_list' %}" class="btn btn-secondary ml-2">{% trans 'Cancel' %}</a>
+	</div>
+</form>
+{% endblock content %}

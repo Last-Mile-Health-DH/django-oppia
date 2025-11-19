@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load display_functions %}
+{% load static %}
+
+{% block extra_head_title %}
+	{% trans 'Training' %}
+{% endblock extra_head_title %}
+
+{% block header %}
+<div class="jumbotron mb-4">
+    <div class="row">
+			<div class="col-md-10">
+				<h3>
+                    <a href="{% url 'training:training_list' %}">{% trans 'Trainings' %}</a>
+                    <em class="material-icons md-18 ">arrow_forward_ios</em>
+                    {% if is_new %} {% trans 'New training' %} {% else %} {{ object.description }} {% endif %}</h3>
+			</div>
+	</div>
+
+</div>
+{% endblock header %}
+
+{% block content %}
+
+<form id="training-form" class="form-horizontal" method="post">
+    {% csrf_token %}
+    <div class="row">
+        <div class="col-md-6">
+            {% include 'common/form/input.html' with field=form.name %}
+            {% include 'common/form/input.html' with field=form.description %}
+            {% include 'common/form/input.html' with field=form.date %}
+            {% include 'common/form/input.html' with field=form.sponsor %}
+            {% include 'common/form/select.html' with field=form.module_type %}
+            {% include 'common/form/select.html' with field=form.training_type %}
+            {% include 'common/form/input.html' with field=form.training_center %}
+        </div>
+        
+    </div>
+    <div class="mt-2">
+        <button type="submit" class="btn btn-primary">
+            {% trans 'Create Training' %}
+        </button>
+        <a href="{% url 'training:training_list' %}" class="btn btn-secondary ml-2">{% trans 'Cancel' %}</a>
+    </div>
+</form>
+{% endblock content %}

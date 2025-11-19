@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load display_functions %}
+
+{% block extra_head_title %}
+	{{ training.name }}
+{% endblock extra_head_title %}
+
+{% block header %}
+<div class="jumbotron mb-4">
+    <div class="row">
+			<div class="col-md-10">
+				<h3>
+					{% if request.user.is_staff %}
+						<a href="{% url 'training:training_list' %}">{% trans 'Trainings' %}</a>
+					{% else %}
+						<a href="{% url 'oppia:index' %}">{% trans 'Home' %}</a>
+					{% endif %}
+					<em class="material-icons md-18 ">arrow_forward_ios</em> {{ training.name }}</h3>
+			</div>
+			<div class="col-md-2 text-right">
+				<a href="{% url 'training:edit_training' training.id %}" class="btn btn-light mr-2">{% trans 'Edit' %}</a>
+			</div>
+	</div>
+
+</div>
+{% endblock header %}
+
+{% block content %}
+    <h4>{% trans 'Module Type:' %} <a href="{% url 'training:module_type_detail' training.module_type.id %}">{{ training.module_type.name }}</a></h4>
+    <h5>{% trans 'Status:' %} {{ training.status }}</h5>
+    <h5>{% trans 'Last Updated:' %} {{ training.updated_at|date:"SHORT_DATETIME_FORMAT" }}</h5> 
+    <hr>
+    <div>
+        {{ training.description|linebreaks }}
+    </div>
+	<hr>
+	<h3>{% trans 'Recent Activity' %}</h3>
+
+	<!-- {% include "oppia/includes/activity-graph.html" with graph_div_id="training_activity_graph_div" %} -->
+	
+	<h3>{% trans 'Participants' %}</h3>
+	<div class="table-responsive">
+		 <table class="table table-striped">
+		 	 <caption class="d-none	">{% trans 'Participants' %}</caption>
+		 	 <thead>
+				<tr>
+				  <th scope="col">#</th>
+				  <th scope="col">{% trans 'Name' %}</th>
+				  <th scope="col">{% trans 'Email' %}</th>
+				  <th scope="col">{% trans 'Role' %}</th>
+				</tr>
+			  </thead>
+			  <tbody>
+			{% for participant in participants %}
+				<tr>
+				  <td>{{ forloop.counter }}</td>
+				  <td>{{ participant.get_full_name }}</td>
+				  <td>{{ participant.email }}</td>
+				  <td>
+					{% if participant.is_staff %}
+						{% trans 'Staff' %}
+					{% else %}
+						{% trans 'User' %}
+					{% endif %}
+				  </td>
+				</tr>
+			{% endfor %}
+			  </tbody>
+		 </table>
+		 <a href="{% url 'training:add_participant' training.id %}" class="btn btn-secondary mt-2">{% trans 'Add Participants' %}</a>
+		 <a href="{% url 'training:bulk_add_participants' training.id %}" class="btn btn-secondary mt-2">{% trans 'Bulk Upload Participants' %}</a>
+	</div>
+	<h3>{% trans 'Courses' %}</h3>
+{% endblock content %}

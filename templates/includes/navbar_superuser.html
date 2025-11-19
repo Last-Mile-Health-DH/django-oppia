@@ -55,7 +55,16 @@
               <em class="material-icons mr-3">book</em> {% trans 'menu_courses' %}
             </a>
             </li>
-
+             <li class="nav-item">
+              <a class="nav-link" href="{% url 'training:training_list'%}">
+                <em class="material-icons mr-3">cast_for_education</em>{% trans 'Trainings' %}
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'training:module_type_list'%}">
+                <em class="material-icons mr-3">view_module</em>{% trans 'Modules' %}
+              </a>
+            </li>
             <li class="nav-item">
             <a class="nav-link" href="{% url 'av:index' %}">
               <em class="material-icons mr-3">video_library</em> {% trans 'Media' %}

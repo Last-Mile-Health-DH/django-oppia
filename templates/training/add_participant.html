@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load display_functions %}
+
+{% block extra_head_title %}
+	{{ training.name }}
+{% endblock extra_head_title %}
+
+{% block header %}
+<div class="jumbotron mb-4">
+    <div class="row">
+			<div class="col-md-10">
+				<h3>
+					{% if request.user.is_staff %}
+						<a href="{% url 'training:training_list' %}">{% trans 'Trainings' %}</a>
+					{% else %}
+						<a href="{% url 'oppia:index' %}">{% trans 'Home' %}</a>
+					{% endif %}
+					<em class="material-icons md-18 ">arrow_forward_ios</em> {{ training.name }}</h3>
+			</div>
+            <div class="col-md-2 text-right">
+                {% trans 'Adding Participants' %}
+			</div>
+	</div>
+
+</div>
+{% endblock header %}
+
+{% block content %}
+<div class="table-responsive">
+    <h3>{% trans 'Current Participants' %}</h3>
+		 <table class="table table-striped">
+		 	 <caption class="d-none	">{% trans 'Participants' %}</caption>
+		 	 <thead>
+				<tr>
+				  <th scope="col">#</th>
+                  <th scope="col">{% trans 'Username' %}</th>
+				  <th scope="col">{% trans 'Name' %}</th>
+				  <th scope="col">{% trans 'Email' %}</th>
+				  <th scope="col">{% trans 'Role' %}</th>
+				</tr>
+			  </thead>
+			  <tbody>
+			{% for participant in participants %}
+				<tr>
+				  <td>{{ forloop.counter }}</td>
+                  <td>{{ participant.username }}</td>
+				  <td>{{ participant.get_full_name }}</td>
+				  <td>{{ participant.email }}</td>
+				  <td>
+					{% if participant.is_staff %}
+						{% trans 'Staff' %}
+					{% else %}
+						{% trans 'User' %}
+					{% endif %}
+				  </td>
+				</tr>
+			{% endfor %}
+			  </tbody>
+		 </table>
+	</div>
+<hr>
+<h3>{% trans 'Add Participants' %}</h3>
+<form id="add-participant-form" class="form-horizontal" method="post">
+    {% csrf_token %}
+    <div class="row">
+        <div class="col-md-6">
+            {% include 'common/form/select_multiple.html' with field=form.user %}
+        </div>
+    </div>
+    <div class="mt-2">
+        <button type="submit" class="btn btn-primary">
+            {% trans 'Add Participants' %}
+        </button>
+    </div>
+</form>
+
+
+{% endblock content %}
