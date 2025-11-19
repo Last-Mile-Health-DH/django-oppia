@@ -28,7 +28,27 @@
 
 {% block content %}
     <h4>{% trans 'Module Type:' %} <a href="{% url 'training:module_type_detail' training.module_type.id %}">{{ training.module_type.name }}</a></h4>
-    <h5>{% trans 'Status:' %} {{ training.status }}</h5>
+	{% if training.status == 'scheduled' %}
+		{% with status_class='bg-info' %}
+			<h5 class="{{ status_class }} p-2 rounded">{% trans 'Status:' %} {{ training.status }}</h5>
+		{% endwith %}
+	{% elif training.status == 'in_progress' %}
+		{% with status_class='bg-warning' %}
+			<h5 class="{{ status_class }} p-2 rounded">{% trans 'Status:' %} {{ training.status }}</h5>
+		{% endwith %}
+	{% elif training.status == 'completed' %}
+		{% with status_class='bg-success' %}
+			<h5 class="{{ status_class }} p-2 rounded">{% trans 'Status:' %} {{ training.status }}</h5>
+		{% endwith %}
+	{% elif training.status == 'canceled' %}
+		{% with status_class='bg-danger' %}
+			<h5 class="{{ status_class }} p-2 rounded">{% trans 'Status:' %} {{ training.status }}</h5>
+		{% endwith %}
+	{% else %}
+		{% with status_class='bg-secondary' %}
+			<h5 class="{{ status_class }} p-2 rounded">{% trans 'Status:' %} {{ training.status }}</h5>
+		{% endwith %}
+	{% endif %}
     <h5>{% trans 'Last Updated:' %} {{ training.updated_at|date:"SHORT_DATETIME_FORMAT" }}</h5> 
     <hr>
     <div>
@@ -49,6 +69,7 @@
 				  <th scope="col">{% trans 'Name' %}</th>
 				  <th scope="col">{% trans 'Email' %}</th>
 				  <th scope="col">{% trans 'Role' %}</th>
+				  <th scope="col">{% trans 'Delete' %}</th>
 				</tr>
 			  </thead>
 			  <tbody>
@@ -63,6 +84,12 @@
 					{% else %}
 						{% trans 'User' %}
 					{% endif %}
+				  </td>
+				  <td>
+					<form method="post" action="{% url 'training:remove_participant' training.id participant.id %}">
+						{% csrf_token %}
+						<button type="submit" class="btn btn-danger btn-sm">{% trans 'Delete' %}</button>
+					</form>
 				  </td>
 				</tr>
 			{% endfor %}
