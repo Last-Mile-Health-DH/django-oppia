@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Training, ModuleType, TrainingStatus
 from .forms import (TrainingForm, ModuleTypeForm, UploadPartcipantsProfileForm,
-                    EditTrainingForm, AddParticipantForm)
+                    EditTrainingForm, AddParticipantForm, AddCourseForm)
 
 from django.contrib.auth.models import User
 from helpers.mixins.PermissionMixins import AdminRequiredMixin, StaffRequiredMixin
@@ -10,6 +10,8 @@ from profile.forms import UploadProfileForm, UserSearchForm, DeleteAccountForm, 
 from profile.models import UserProfile, CustomField, UserProfileCustomField
 import csv
 from django.utils.translation import gettext as _
+from django.core.paginator import Paginator
+from oppia.models.main import Course
 
 # Create your views here.
 
@@ -35,11 +37,18 @@ def add_module_type(request):
 def training_detail(request, training_id):
     training_statuses = TrainingStatus.choices
     training = Training.objects.get(id=training_id)
-    participants = training.get_participants()
-    return render(request, 'training/training_detail.html', 
-                  {'training': training, 
-                   'training_statuses': training_statuses,
-                   'participants': participants})
+    participants_list = training.get_participants()
+    paginator = Paginator(participants_list, 10)  # Show 10 participants per page
+
+    page_number = request.GET.get('page')
+    participants = paginator.get_page(page_number)
+    courses = training.courses.all()
+    return render(request, 'training/training_detail.html', {
+        'training': training,
+        'training_statuses': training_statuses,
+        'participants': participants,
+        'courses': courses
+    })
 
 def module_type_detail(request, module_type_id):
     module_type = ModuleType.objects.get(id=module_type_id)
@@ -108,7 +117,22 @@ def add_participant(request, training_id):
         'participants': participants
     })
 
-
+def add_course(request, training_id):
+    training = Training.objects.get(id=training_id)
+    courses = training.courses.all()
+    if request.method == 'POST':
+        form = AddCourseForm(request.POST, training=training)
+        if form.is_valid():
+            course = form.cleaned_data['course']
+            training.courses.add(course)
+        return redirect('training:training_detail', training_id=training.id)
+    else:
+        form = AddCourseForm(training=training)
+    return render(request, 'training/add_course.html', {
+        'training': training,
+        'form': form,
+        'courses': courses
+    })
 class BulkAddParticipants(AdminRequiredMixin, FormView):
     form_class = UploadPartcipantsProfileForm
     template_name = 'training/upload_participants.html'
@@ -252,4 +276,10 @@ def remove_participant(request, training_id, user_id):
     training = Training.objects.get(id=training_id)
     user = User.objects.get(id=user_id)
     training.users.remove(user)
+    return redirect('training:training_detail', training_id=training.id)
+
+def remove_course(request, training_id, course_id):
+    training = Training.objects.get(id=training_id)
+    course = Course.objects.get(id=course_id)
+    training.courses.remove(course)
     return redirect('training:training_detail', training_id=training.id)

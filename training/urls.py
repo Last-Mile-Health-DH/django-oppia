@@ -2,7 +2,9 @@ from django.urls import path
 from .views import (training_list, module_type_list, add_module_type,
                     training_detail, module_type_detail, edit_module_type,
                     change_training_status, add_training, add_participant,
-                    edit_training, BulkAddParticipants, remove_participant)
+                    edit_training, BulkAddParticipants, remove_participant,
+                    add_course, remove_course
+                    )
 
 app_name = 'training'
 
@@ -19,4 +21,6 @@ urlpatterns = [
     path('trainings/<int:training_id>/add-participant/', add_participant, name='add_participant'),
     path('trainings/<int:training_id>/bulk-add-participants/', BulkAddParticipants.as_view(), name='bulk_add_participants'),
     path('trainings/<int:training_id>/remove-participant/<int:user_id>/', remove_participant, name='remove_participant'),
+    path('trainings/<int:training_id>/add-course/', add_course, name='add_course'),
+    path('trainings/<int:training_id>/remove-course/<int:course_id>/', remove_course, name='remove_course'),
 ]

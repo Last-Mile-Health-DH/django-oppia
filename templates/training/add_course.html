@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load display_functions %}
+{% load json_extras %}
+{% block extra_head_title %}
+	{{ training.name }}
+{% endblock extra_head_title %}
+
+{% block header %}
+<div class="jumbotron mb-4">
+    <div class="row">
+			<div class="col-md-10">
+				<h3>
+					{% if request.user.is_staff %}
+						<a href="{% url 'training:training_list' %}">{% trans 'Trainings' %}</a>
+					{% else %}
+						<a href="{% url 'oppia:index' %}">{% trans 'Home' %}</a>
+					{% endif %}
+					<em class="material-icons md-18 ">arrow_forward_ios</em> {{ training.name }}</h3>
+			</div>
+            <div class="col-md-2 text-right">
+                {% trans 'Adding Courses' %}
+			</div>
+	</div>
+
+</div>
+{% endblock header %}
+{% block content %}
+<div class="table-responsive">
+    <h3>{% trans 'Current Courses' %}</h3>
+         <table class="table table-striped">
+              <caption class="d-none">{% trans 'Courses' %}</caption>
+              <thead>
+                <tr>
+                  <th scope="col">#</th>
+                    <th scope="col">{% trans 'Course Name' %}</th>
+                    <th scope="col">{% trans 'Course shortname' %}</th>
+                    <th scope="col">{% trans 'Status' %}</th>
+                </tr>
+                </thead>
+                <tbody>
+            {% for course in courses %}
+                <tr>
+                  <td>{{ forloop.counter }}</td>
+                    <td>{{ course.title|json_key:'en' }}</td>
+                    <td>{{ course.shortname }}</td>
+                    <td>{{ course.status }}</td>
+                </tr>
+            {% endfor %}
+                </tbody>
+            </table>
+</div>
+<hr>
+<h3>{% trans 'Add Courses' %}</h3>
+<form id="add-course-form" class="form-horizontal" method="post">
+    {% csrf_token %}
+    {% include 'common/form/select.html' with field=form.course %}
+    <div class="mt-2">
+        <button type="submit" class="btn btn-primary">
+            {% trans 'Add Course' %}
+        </button>
+    </div>
+</form>
+
+{% endblock content %}

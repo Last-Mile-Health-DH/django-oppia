@@ -75,6 +75,16 @@ class AddParticipantForm(forms.Form):
 		else:
 			self.fields['user'].queryset = base_qs
 
+class AddCourseForm(forms.Form):
+	course = forms.ModelChoiceField(queryset=Course.objects.all(), label='Select Course')
+
+	def __init__(self, *args, **kwargs):
+		training = kwargs.pop('training', None)
+		course = kwargs.pop('course', None)
+		super().__init__(*args, **kwargs)
+		self.fields['course'].queryset = Course.objects.all()
+		if training:
+			self.fields['course'].queryset = self.fields['course'].queryset.exclude(trainings=training)
 
 class UploadPartcipantsProfileForm(forms.Form):
 	upload_file = forms.FileField(
