@@ -17,6 +17,7 @@ qrcode==7.4.2
 mysqlclient==2.2.4
 django-storages==1.14.4
 django-database-view==0.3.0
+gunicorn==22.0.0
 
 # Framework for API v2
 django-tastypie==0.14.7

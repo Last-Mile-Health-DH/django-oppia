@@ -1,42 +1,136 @@
 
 services:
-  web:
-    build: .
-    command: python manage.py runserver 0.0.0.0:8000
+  oppia:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - SECRET_KEY=${SECRET_KEY}
+      - ALLOWED_HOSTS=${ALLOWED_HOSTS}
+      - BASESITE_URL=${BASESITE_URL}
+      - OPPIA_ANDROID_DEFAULT_PACKAGEID=${OPPIA_ANDROID_DEFAULT_PACKAGEID}
+      - OPPIA_ANDROID_PACKAGEID=${OPPIA_ANDROID_PACKAGEID}
+      - TIME_ZONE=${TIME_ZONE}
+      - SERVER_EMAIL=${SERVER_EMAIL}
+      - DEBUG=${DEBUG}
+      - OPPIA_GOOGLE_ANALYTICS_ENABLED=${OPPIA_GOOGLE_ANALYTICS_ENABLED}
+      - OPPIA_GOOGLE_ANALYTICS_CODE=${OPPIA_GOOGLE_ANALYTICS_CODE}
+      - OPPIA_GOOGLE_ANALYTICS_DOMAIN=${OPPIA_GOOGLE_ANALYTICS_DOMAIN}
+      - OPPIA_MAX_UPLOAD_SIZE=${OPPIA_MAX_UPLOAD_SIZE}
+      - OPPIA_ANDROID_ON_GOOGLE_PLAY=${OPPIA_ANDROID_ON_GOOGLE_PLAY}
+      - OPPIA_ALLOW_SELF_REGISTRATION=${OPPIA_ALLOW_SELF_REGISTRATION}
+      - OPPIA_ALLOW_PROFILE_EDITING=${OPPIA_ALLOW_PROFILE_EDITING}
+      - OPPIA_SHOW_GRAVATARS=${OPPIA_SHOW_GRAVATARS}
+      - OPPIA_POINTS_ENABLED=${OPPIA_POINTS_ENABLED}
+      - OPPIA_BADGES_ENABLED=${OPPIA_BADGES_ENABLED}
+      - BADGE_AWARDING_METHOD=${BADGE_AWARDING_METHOD}
+      - DJANGO_SUPERUSER_USERNAME=${DJANGO_SUPERUSER_USERNAME}
+      - DJANGO_SUPERUSER_EMAIL=${DJANGO_SUPERUSER_EMAIL}
+      - DJANGO_SUPERUSER_PASSWORD=${DJANGO_SUPERUSER_PASSWORD}
     ports:
       - "${DJANGO_PORT:-8000}:8000"
     volumes:
-      - .:/code
-      - ../static:/static
-      - ../media:/media
-      - ../upload:/upload
+      - ./oppiamobile/settings_secret_docker.py:/usr/src/OPPIA/oppiamobile/settings_secret.py
+      - static:/usr/src/static
+      - media:/usr/src/media
+      - upload:/usr/src/upload
     depends_on:
       db:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import socket; socket.create_connection(('localhost', 8000), 2)"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+  oppia-cron:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    entrypoint: ["sh", "./oppia-cron.sh"]
+    environment:
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - SECRET_KEY=${SECRET_KEY}
+      - ALLOWED_HOSTS=${ALLOWED_HOSTS}
+      - BASESITE_URL=${BASESITE_URL}
+      - OPPIA_ANDROID_DEFAULT_PACKAGEID=${OPPIA_ANDROID_DEFAULT_PACKAGEID}
+      - OPPIA_ANDROID_PACKAGEID=${OPPIA_ANDROID_PACKAGEID}
+      - TIME_ZONE=${TIME_ZONE}
+      - SERVER_EMAIL=${SERVER_EMAIL}
+      - DEBUG=${DEBUG}
+      - OPPIA_GOOGLE_ANALYTICS_ENABLED=${OPPIA_GOOGLE_ANALYTICS_ENABLED}
+      - OPPIA_GOOGLE_ANALYTICS_CODE=${OPPIA_GOOGLE_ANALYTICS_CODE}
+      - OPPIA_GOOGLE_ANALYTICS_DOMAIN=${OPPIA_GOOGLE_ANALYTICS_DOMAIN}
+      - OPPIA_MAX_UPLOAD_SIZE=${OPPIA_MAX_UPLOAD_SIZE}
+      - OPPIA_ANDROID_ON_GOOGLE_PLAY=${OPPIA_ANDROID_ON_GOOGLE_PLAY}
+      - OPPIA_ALLOW_SELF_REGISTRATION=${OPPIA_ALLOW_SELF_REGISTRATION}
+      - OPPIA_ALLOW_PROFILE_EDITING=${OPPIA_ALLOW_PROFILE_EDITING}
+      - OPPIA_SHOW_GRAVATARS=${OPPIA_SHOW_GRAVATARS}
+      - OPPIA_POINTS_ENABLED=${OPPIA_POINTS_ENABLED}
+      - OPPIA_BADGES_ENABLED=${OPPIA_BADGES_ENABLED}
+      - BADGE_AWARDING_METHOD=${BADGE_AWARDING_METHOD}
+      - CRON_INTERVAL_SECONDS=${CRON_INTERVAL_SECONDS}
+    volumes:
+      - ./oppiamobile/settings_secret_docker.py:/usr/src/OPPIA/oppiamobile/settings_secret.py
+      - media:/usr/src/media
+      - upload:/usr/src/upload
+    depends_on:
+      oppia:
+        condition: service_healthy
+    restart: always
+
   db:
-    image: mysql:8.0
+    image: mysql:8.4
     ports:
       - "${DB_PORT:-3306}:${DB_PORT:-3306}"
     volumes:
-      - data:/var/lib/mysql
+      - db_data:/var/lib/mysql
     environment:
-      MYSQL_ROOT_PASSWORD_FILE: /run/secrets/db_root_password
-      MYSQL_DATABASE: oppia
-      MYSQL_USER: oppiauser
-      MYSQL_PASSWORD_FILE: /run/secrets/db_password
-    secrets:
-      - db_root_password
-      - db_password
+      - MYSQL_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${DB_NAME}
+      - MYSQL_USER=${DB_USER}
+      - MYSQL_PASSWORD=${DB_PASSWORD}
+    restart: always
     healthcheck:
       test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
       interval: 10s
       timeout: 3s
       retries: 3
+  
+  caddy:
+    image: caddy:latest
+    ports:
+      - "80:80"
+      - "443:443"
+    restart: always
+    environment:
+      - DOMAIN=${DOMAIN}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+      - static:/srv/static
+      - media:/srv/media
+    depends_on:
+      db:
+        condition: service_healthy
+      oppia:
+        condition: service_healthy
 
-secrets:
-  db_password:
-    file: ./db_password.txt
-  db_root_password:
-    file: ./db_root_password.txt
+
 volumes:
-  data:
+  db_data:
+  static:
+  media:
+  upload:
+  caddy_data:
+  caddy_config:

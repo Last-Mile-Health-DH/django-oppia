@@ -1,0 +1,17 @@
+{$DOMAIN} {
+	encode gzip
+
+	handle /static/* {
+		root * /srv
+		file_server
+	}
+
+	handle /media/* {
+		root * /srv
+		file_server
+	}
+
+	handle {
+		reverse_proxy oppia:8000
+	}
+}

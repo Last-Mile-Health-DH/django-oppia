@@ -12,6 +12,7 @@
 /.eggs
 /.scannerwork
 oppiamobile/settings_secret.py
+oppiamobile/settings_secret_docker.py
 .coverage
 /tests/coverage.xml
 
@@ -24,3 +25,5 @@ oppiamobile/settings_secret.py
 /db.sqlite3
 /*.sock
 /.pytest_cache/
+
+.env
